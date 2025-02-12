@@ -1,0 +1,77 @@
+# "org" ensures this Service is used with the correct Serverless Framework Access Key.
+org: cielowigle
+# "app" enables Serverless Framework Dashboard features and sharing them with other Services.
+app: todo-maria-training
+# "service" is the name of this project. This will also be added to your AWS resource names.
+service: todo
+
+provider:
+  name: aws
+  runtime: python3.11
+  region: us-east-1
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:PutItem
+        - dynamodb:GetItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+        - dynamodb:Scan
+      Resource:
+        - arn:aws:dynamodb:${self:provider.region}:*:table/TodoTable
+
+package:
+  individually: true
+  patterns:
+    - '!venv/**'
+    - '!node_modules/**'
+    - 'node_modules/node-fetch/**'
+    - '!package.json'
+    - '!package-lock.json'
+    - '!README.md'
+
+functions:
+  add_todo:
+    handler: src/addTodo.add_todo
+    events:
+      - http:
+          path: todos
+          method: post
+  get_todo:
+    handler: src/getTodo.get_todo
+    events:
+      - http:
+          path: todos/{id}
+          method: get
+  get_all_todo:
+    handler: src/getAllTodo.get_all_todo
+    events:
+      - http:
+          path: todos
+          method: get
+  update_todo:
+    handler: src/updateTodo.update_todo
+    events:
+      - http:
+          path: todos/{id}
+          method: put
+  delete:
+    handler: src/deleteTodo.delete
+    events:
+      - http:
+          path: todos/{id}
+          method: delete
+
+resources:
+  Resources:
+    TodoTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: TodoTable
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
