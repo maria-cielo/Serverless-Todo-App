@@ -1,13 +1,6 @@
-import json
-import boto3
+from layers.python.utils import delete_todo
 
-dynamodb = boto3.resource("dynamodb")
-table = dynamodb.Table("TodoTable")
-
-def delete(event, context):
+def lambda_handler(event, context):
     todo_id = event["pathParameters"]["id"]
-    table.delete_item(Key={"id": todo_id})
-    response = {
-        "statusCode": 204,
-    }
-    return response
+    delete_todo(todo_id)
+    return {"statusCode": 204}

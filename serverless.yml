@@ -46,51 +46,68 @@ package:
     - '!package.json'
     - '!package-lock.json'
     - '!README.md'
+    - 'src/**'
+    - 'layers/**'
 
 functions:
   add_todo:
-    handler: src/addTodo.add_todo
+    package:
+      patterns:
+        - 'src/addTodo.py'
+    handler: src.addTodo.lambda_handler
     layers:
-      - arn:aws:lambda:us-east-1:598858048125:layer:todoLayer:1
+      - arn:aws:lambda:us-east-1:598858048125:layer:todoLayer:3
     events:
       - http:
-          path: todos
+          path: v1/todos
           method: post
           private: true
   get_todo:
-    handler: src/getTodo.get_todo
+    package:
+      patterns:
+        - 'src/getTodo.py'
+    handler: src.getTodo.lambda_handler
     layers:
-      - arn:aws:lambda:us-east-1:598858048125:layer:todoLayer:1
+      - arn:aws:lambda:us-east-1:598858048125:layer:todoLayer:3
     events:
       - http:
-          path: todos/{id}
+          path: v1/todos/{id}
           method: get
           private: true
   get_all_todo:
-    handler: src/getAllTodo.get_all_todo
+    package:
+      patterns:
+        - 'src/getAllTodo.py'
+    handler: src.getAllTodo.lambda_handler
     layers:
-      - arn:aws:lambda:us-east-1:598858048125:layer:todoLayer:1
+      - arn:aws:lambda:us-east-1:598858048125:layer:todoLayer:3
     events:
       - http:
-          path: todos
+          path: v1/todos
           method: get
           private: true
   update_todo:
-    handler: src/updateTodo.update_todo
+    package:
+      patterns:
+        - 'src/updateTodo.py'
+    handler: src.updateTodo.lambda_handler
     layers:
-      - arn:aws:lambda:us-east-1:598858048125:layer:todoLayer:1
+      - arn:aws:lambda:us-east-1:598858048125:layer:todoLayer:3
     events:
       - http:
-          path: todos/{id}
+          path: v1/todos/{id}
           method: put
           private: true
   delete:
-    handler: src/deleteTodo.delete
+    package:
+      patterns:
+        - 'src/deleteTodo.py'
+    handler: src.deleteTodo.lambda_handler
     layers:
-      - arn:aws:lambda:us-east-1:598858048125:layer:todoLayer:1
+      - arn:aws:lambda:us-east-1:598858048125:layer:todoLayer:3
     events:
       - http:
-          path: todos/{id}
+          path: v1/todos/{id}
           method: delete
           private: true
 

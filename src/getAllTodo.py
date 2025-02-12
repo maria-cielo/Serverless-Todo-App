@@ -1,14 +1,7 @@
 import json
-import boto3
-
-dynamodb = boto3.resource("dynamodb")
-table = dynamodb.Table("TodoTable")
+from layers.python.utils import get_all_todos
 
 
-def get_all_todo(event, context):
-    response = table.scan()  # Fetch all items
-
-    return {
-        "statusCode": 200,
-        "body": json.dumps(response["Items"])
-    }
+def lambda_handler(event, context):
+    todos = get_all_todos()
+    return {"statusCode": 200, "body": json.dumps(todos)}
