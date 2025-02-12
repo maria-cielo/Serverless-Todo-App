@@ -9,6 +9,16 @@ provider:
   name: aws
   runtime: python3.11
   region: us-east-1
+  apiGateway:
+    apiKeys:
+      - todoApiKey
+    usagePlan:
+      quota:
+        limit: 500 # Maximum 500 requests per month
+        period: MONTH
+      throttle:
+        rateLimit: 5 # Max 5 requests per second
+        burstLimit: 10 # Handles request spikes
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -19,6 +29,13 @@ provider:
         - dynamodb:Scan
       Resource:
         - arn:aws:dynamodb:${self:provider.region}:*:table/TodoTable
+
+layers:
+  todoLayer:
+    path: layers
+    compatibleRuntimes:
+      - python3.11
+    description: "Lambda Layer for Python dependencies"
 
 package:
   individually: true
@@ -33,34 +50,49 @@ package:
 functions:
   add_todo:
     handler: src/addTodo.add_todo
+    layers:
+      - arn:aws:lambda:us-east-1:598858048125:layer:todoLayer:1
     events:
       - http:
           path: todos
           method: post
+          private: true
   get_todo:
     handler: src/getTodo.get_todo
+    layers:
+      - arn:aws:lambda:us-east-1:598858048125:layer:todoLayer:1
     events:
       - http:
           path: todos/{id}
           method: get
+          private: true
   get_all_todo:
     handler: src/getAllTodo.get_all_todo
+    layers:
+      - arn:aws:lambda:us-east-1:598858048125:layer:todoLayer:1
     events:
       - http:
           path: todos
           method: get
+          private: true
   update_todo:
     handler: src/updateTodo.update_todo
+    layers:
+      - arn:aws:lambda:us-east-1:598858048125:layer:todoLayer:1
     events:
       - http:
           path: todos/{id}
           method: put
+          private: true
   delete:
     handler: src/deleteTodo.delete
+    layers:
+      - arn:aws:lambda:us-east-1:598858048125:layer:todoLayer:1
     events:
       - http:
           path: todos/{id}
           method: delete
+          private: true
 
 resources:
   Resources:

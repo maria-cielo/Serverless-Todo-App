@@ -28,9 +28,9 @@ The project allows you to add, get (read), update and delete TODO items.
 * Python 3.9+
 * AWS CLI configured with appropriate credentials
 * Serverless Framework installed globally
-```
-npm install -g serverless
-```
+    ```
+    npm install -g serverless
+    ```
 
 ## Usage
 
