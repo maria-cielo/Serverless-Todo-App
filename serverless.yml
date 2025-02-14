@@ -9,6 +9,8 @@ provider:
   name: aws
   runtime: python3.11
   region: us-east-1
+  websocketsApiName: todoWebsocketApi
+  websocketsApiRouteSelectionExpression: $request.body.action
   apiGateway:
     apiKeys:
       - todoApiKey
@@ -29,13 +31,13 @@ provider:
         - dynamodb:Scan
       Resource:
         - arn:aws:dynamodb:${self:provider.region}:*:table/TodoTable
+        - arn:aws:dynamodb:${self:provider.region}:*:table/WebSocketConnections
 
-layers:
-  todoLayer:
-    path: layers
-    compatibleRuntimes:
-      - python3.11
-    description: "Lambda Layer for Python dependencies"
+    - Effect: Allow
+      Action:
+        - execute-api:ManageConnections
+      Resource:
+        - arn:aws:execute-api:${self:provider.region}:*:*/*/@connections/*
 
 package:
   individually: true
@@ -56,7 +58,7 @@ functions:
         - 'src/addTodo.py'
     handler: src.addTodo.lambda_handler
     layers:
-      - arn:aws:lambda:us-east-1:598858048125:layer:todoLayer:3
+      - arn:aws:lambda:us-east-1:598858048125:layer:todoLayer:9
     events:
       - http:
           path: v1/todos
@@ -68,7 +70,7 @@ functions:
         - 'src/getTodo.py'
     handler: src.getTodo.lambda_handler
     layers:
-      - arn:aws:lambda:us-east-1:598858048125:layer:todoLayer:3
+      - arn:aws:lambda:us-east-1:598858048125:layer:todoLayer:9
     events:
       - http:
           path: v1/todos/{id}
@@ -80,7 +82,7 @@ functions:
         - 'src/getAllTodo.py'
     handler: src.getAllTodo.lambda_handler
     layers:
-      - arn:aws:lambda:us-east-1:598858048125:layer:todoLayer:3
+      - arn:aws:lambda:us-east-1:598858048125:layer:todoLayer:9
     events:
       - http:
           path: v1/todos
@@ -92,7 +94,7 @@ functions:
         - 'src/updateTodo.py'
     handler: src.updateTodo.lambda_handler
     layers:
-      - arn:aws:lambda:us-east-1:598858048125:layer:todoLayer:3
+      - arn:aws:lambda:us-east-1:598858048125:layer:todoLayer:9
     events:
       - http:
           path: v1/todos/{id}
@@ -104,23 +106,61 @@ functions:
         - 'src/deleteTodo.py'
     handler: src.deleteTodo.lambda_handler
     layers:
-      - arn:aws:lambda:us-east-1:598858048125:layer:todoLayer:3
+      - arn:aws:lambda:us-east-1:598858048125:layer:todoLayer:9
     events:
       - http:
           path: v1/todos/{id}
           method: delete
           private: true
+  connect:
+    package:
+      patterns:
+        - 'src/websocket/connect.py'
+    handler: src.websocket.connect.lambda_handler
+    events:
+      - websocket:
+          route: $connect
+  disconnect:
+    package:
+      patterns:
+        - 'src/websocket/disconnect.py'
+    handler: src.websocket.disconnect.lambda_handler
+    events:
+      - websocket:
+          route: $disconnect
+  message:
+    package:
+      patterns:
+        - 'src/websocket/message.py'
+    handler: src.websocket.message.lambda_handler
+    events:
+      - websocket:
+          route: sendMessage
 
 resources:
   Resources:
     TodoTable:
       Type: AWS::DynamoDB::Table
+      DeletionPolicy: Delete
       Properties:
-        TableName: TodoTable
+        TableName: Todo
         BillingMode: PAY_PER_REQUEST
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S
         KeySchema:
           - AttributeName: id
+            KeyType: HASH
+
+    WebSocketConnections:
+      Type: AWS::DynamoDB::Table
+      DeletionPolicy: Delete
+      Properties:
+        TableName: WebSocketConnections
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: connectionId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: connectionId
             KeyType: HASH

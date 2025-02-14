@@ -1,0 +1,17 @@
+service: todo-layers
+
+provider:
+  name: aws
+  runtime: python3.11
+  region: us-east-1
+
+layers:
+  todoLayer:
+    path: .
+    compatibleRuntimes:
+      - python3.11
+    description: "Lambda Layer for Python dependencies"
+
+outputs:
+  todoLayerArn:
+    Value: { Ref: TodoLayerLambdaLayer }
