@@ -1,3 +1,10 @@
+service: todo-iam-policies
+
+provider:
+  name: aws
+  runtime: python3.11
+  region: us-east-1
+
 iamRoleStatements:
   - Effect: Allow
     Action:
@@ -7,11 +14,28 @@ iamRoleStatements:
       - dynamodb:DeleteItem
       - dynamodb:Scan
     Resource:
-      - arn:aws:dynamodb:${self:provider.region}:*:table/TodoTable
-      - arn:aws:dynamodb:${self:provider.region}:*:table/WebSocketConnections
+      - arn:aws:dynamodb:us-east-1:598858048125:table/TodosNew
+      - arn:aws:dynamodb:us-east-1:598858048125:table/TodoWebSocket
 
   - Effect: Allow
     Action:
       - execute-api:ManageConnections
     Resource:
       - arn:aws:execute-api:${self:provider.region}:*:*/*/@connections/*
+
+  - Effect: Allow
+    Action:
+      - dynamodb:DescribeStream
+      - dynamodb:GetRecords
+      - dynamodb:GetShardIterator
+      - dynamodb:ListStreams
+    Resource:
+      - arn:aws:dynamodb:${self:provider.region}:*:table/TodosNew/stream/*
+
+  - Effect: Allow
+    Action:
+      - sqs:ReceiveMessage
+      - sqs:DeleteMessage
+      - sqs:GetQueueAttributes
+    Resource:
+      - arn:aws:sqs:${self:provider.region}:*:queue/TodoQueueNew

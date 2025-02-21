@@ -3,7 +3,7 @@ import boto3
 from layers.python.utils import get_todo
 
 dynamodb = boto3.resource("dynamodb")
-table = dynamodb.Table("TodoTable")
+table = dynamodb.Table("TodosNew")
 
 
 def lambda_handler(event, context):

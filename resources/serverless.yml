@@ -11,7 +11,7 @@ resources:
       Type: AWS::DynamoDB::Table
       DeletionPolicy: Delete
       Properties:
-        TableName: TodosNew
+        TableName: Todos
         BillingMode: PAY_PER_REQUEST
         AttributeDefinitions:
           - AttributeName: id
@@ -26,7 +26,7 @@ resources:
       Type: AWS::DynamoDB::Table
       DeletionPolicy: Delete
       Properties:
-        TableName: TodoWebSocketNew
+        TableName: TodoWebSocket
         BillingMode: PAY_PER_REQUEST
         AttributeDefinitions:
           - AttributeName: connectionId
@@ -38,4 +38,25 @@ resources:
     TodoQueue:
       Type: AWS::SQS::Queue
       Properties:
-        QueueName: TodoQueueNew
+        QueueName: TodoQueue
+
+outputs:
+  todoTableArn:
+    Value: !GetAtt TodoTable.Arn
+    Export:
+      Name: todoTableArn
+
+  todoTableStreamArn:
+    Value: !GetAtt TodoTable.StreamArn
+    Export:
+      Name: todoTableStreamArn
+
+  webSocketConnectionsArn:
+    Value: !GetAtt WebSocketConnections.Arn
+    Export:
+      Name: webSocketConnectionsArn
+
+  todoQueueArn:
+    Value: !GetAtt TodoQueue.Arn
+    Export:
+      Name: todoQueueArn

@@ -11,6 +11,9 @@ layers:
     compatibleRuntimes:
       - python3.11
     description: "Lambda Layer for Python dependencies"
+    package:
+      include:
+        - python/**
 
 outputs:
   todoLayerArn:

@@ -1,0 +1,64 @@
+service: todo-iam-policies
+
+provider:
+  name: aws
+  runtime: python3.11
+  region: us-east-1
+
+resources:
+  Resources:
+    TodoIamRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: todoIamRole1
+        AssumeRolePolicyDocument:
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+              Action:
+                - sts:AssumeRole
+        Policies:
+          - PolicyName: TodoPolicy1
+            PolicyDocument:
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - dynamodb:PutItem
+                    - dynamodb:GetItem
+                    - dynamodb:UpdateItem
+                    - dynamodb:DeleteItem
+                    - dynamodb:Scan
+                  Resource:
+                    - arn:aws:dynamodb:${self:provider.region}:*:table/Todos
+                    - arn:aws:dynamodb:${self:provider.region}:*:table/TodoWebSocket
+
+                - Effect: Allow
+                  Action:
+                    - execute-api:ManageConnections
+                  Resource:
+                    - arn:aws:execute-api:${self:provider.region}:*:*/*/@connections/*
+
+                - Effect: Allow
+                  Action:
+                    - dynamodb:DescribeStream
+                    - dynamodb:GetRecords
+                    - dynamodb:GetShardIterator
+                    - dynamodb:ListStreams
+                  Resource:
+                    - arn:aws:dynamodb:${self:provider.region}:*:table/Todos/stream/*
+
+                - Effect: Allow
+                  Action:
+                    - sqs:ReceiveMessage
+                    - sqs:DeleteMessage
+                    - sqs:GetQueueAttributes
+                  Resource:
+                    - arn:aws:sqs:${self:provider.region}:*:queue/TodoQueue
+
+outputs:
+  todoIamRoleArn:
+    Value: !GetAtt TodoIamRole.Arn
+    Export:
+      Name: todo-IamRoleArn

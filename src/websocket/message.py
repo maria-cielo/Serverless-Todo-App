@@ -3,15 +3,17 @@ import json
 
 
 dynamodb = boto3.resource("dynamodb")
-APIGW_MANAGEMENT_API = "https://9ae175ij6c.execute-api.us-east-1.amazonaws.com/dev"
-api_gateway = boto3.client("apigatewaymanagementapi", endpoint_url=APIGW_MANAGEMENT_API)
+APIGW_MANAGEMENT_API = "https://7zlf4mc04b.execute-api.us-east-1.amazonaws.com/dev"
+api_gateway = boto3.client("apigatewaymanagementapi",
+                           endpoint_url=APIGW_MANAGEMENT_API
+                           )
 
 
 def lambda_handler(event, context):
     body = json.loads(event["body"])
     message = body.get("message", "")
 
-    table = dynamodb.Table("WebSocketConnections")
+    table = dynamodb.Table("TodoWebSocket")
     connections = table.scan()["Items"]
 
     for connection in connections:
