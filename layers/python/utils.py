@@ -2,10 +2,16 @@ import json
 import boto3
 from uuid import uuid4
 
-# Initialize DynamoDB Resource (Shared Across Functions)
+
+APIGW_MANAGEMENT_API = "https://vu7zzd52p2.execute-api.us-east-1.amazonaws.com/dev"
+QUEUE_URL = f"https://sqs.us-east-1.amazonaws.com/598858048125/TodoQueue"
+
+api_gateway = boto3.client("apigatewaymanagementapi",
+                           endpoint_url=APIGW_MANAGEMENT_API
+                           )
 dynamodb = boto3.resource("dynamodb")
 table = dynamodb.Table("TodosNew")
-api_gateway = boto3.client("apigatewaymanagementapi")
+sqs = boto3.client("sqs")
 
 
 def create_todo(task):
@@ -79,16 +85,38 @@ def delete_todo(todo_id):
 
 def dynamo_db_stream(event):
     for record in event["Records"]:
-        event_name = record["eventName"]  # INSERT, MODIFY, REMOVE
-        new_image = record.get("dynamodb", {}).get("NewImage", {})
-        old_image = record.get("dynamodb", {}).get("OldImage", {})
+        print("Received event: ", json.dumps(event, indent=2))
 
-        if event_name == "INSERT":
-            print(f"New item added: {json.dumps(new_image)}")
-        elif event_name == "MODIFY":
-            print(f"Item updated: Old: {json.dumps(old_image)}, New: {json.dumps(new_image)}")
-        elif event_name == "REMOVE":
-            print(f"Item deleted: {json.dumps(old_image)}")
+        message_body = {}
+
+        if "eventName" in record:  # DynamoDB Stream Event
+            event_name = record.get("eventName", "")  # INSERT, MODIFY, REMOVE
+            new_image = record.get("dynamodb", {}).get("NewImage", {})
+
+            message_body = {
+                "id": new_image.get("id", {}).get("S"),
+                "task": new_image.get("task", {}).get("S"),
+                "completed": new_image.get("completed", {}).get("BOOL"),
+                "eventType": event_name
+            }
+            print(f"DynamoDB Event: {event_name} -> {json.dumps(new_image)}")
+
+        elif "body" in record:  # SQS Event
+            try:
+                body = json.loads(record["body"])  # Parse the string body to JSON
+                event_type = body.get("eventType", "UNKNOWN")
+                print(f"SQS Event: {event_type} -> {body}")
+            except json.JSONDecodeError:
+                print("Error decoding SQS message body:", record["body"])
+                continue
+
+        if message_body:
+            response = sqs.send_message(
+                QueueUrl=QUEUE_URL,
+                MessageBody=json.dumps(message_body),
+            )
+
+            print(f"Message sent to SQS: {response['MessageId']}")
 
     return {
         "statusCode": 200,

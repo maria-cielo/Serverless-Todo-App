@@ -21,8 +21,12 @@ provider:
       throttle:
         rateLimit: 5 # Max 5 requests per second
         burstLimit: 10 # Handles request spikes
-
-  iamRoleStatements: ${file(./iam.yml):iamRoleStatements}
+#  iam:
+#    role: arn:aws:iam::598858048125:role/todo-dev-us-east-1-lambdaRole
+  iam:
+    role:
+      name: todo-new-lambda-role
+      statements: ${file(./iam.yml):iamRoleStatements}
 
 package:
   individually: true
@@ -43,7 +47,7 @@ functions:
         - 'src/addTodo.py'
     handler: src.addTodo.lambda_handler
     layers:
-      - arn:aws:lambda:us-east-1:598858048125:layer:todoLayer:11
+      - arn:aws:lambda:us-east-1:598858048125:layer:todoLayer:13
     events:
       - http:
           path: v1/todos
@@ -52,6 +56,8 @@ functions:
       - stream:
           type: dynamodb
           arn: arn:aws:dynamodb:us-east-1:598858048125:table/TodosNew/stream/2025-02-21T05:04:14.613
+      - sqs:
+          arn:aws:sqs:us-east-1:598858048125:TodoQueue
 
   get_todo:
     package:
@@ -59,7 +65,7 @@ functions:
         - 'src/getTodo.py'
     handler: src.getTodo.lambda_handler
     layers:
-      - arn:aws:lambda:us-east-1:598858048125:layer:todoLayer:11
+      - arn:aws:lambda:us-east-1:598858048125:layer:todoLayer:13
     events:
       - http:
           path: v1/todos/{id}
@@ -72,7 +78,7 @@ functions:
         - 'src/getAllTodo.py'
     handler: src.getAllTodo.lambda_handler
     layers:
-      - arn:aws:lambda:us-east-1:598858048125:layer:todoLayer:11
+      - arn:aws:lambda:us-east-1:598858048125:layer:todoLayer:13
     events:
       - http:
           path: v1/todos
@@ -85,7 +91,7 @@ functions:
         - 'src/updateTodo.py'
     handler: src.updateTodo.lambda_handler
     layers:
-      - arn:aws:lambda:us-east-1:598858048125:layer:todoLayer:11
+      - arn:aws:lambda:us-east-1:598858048125:layer:todoLayer:13
     events:
       - http:
           path: v1/todos/{id}
@@ -94,13 +100,15 @@ functions:
       - stream:
           type: dynamodb
           arn: arn:aws:dynamodb:us-east-1:598858048125:table/TodosNew/stream/2025-02-21T05:04:14.613
+      - sqs:
+          arn:aws:sqs:us-east-1:598858048125:TodoQueue
   delete:
     package:
       patterns:
         - 'src/deleteTodo.py'
     handler: src.deleteTodo.lambda_handler
     layers:
-      - arn:aws:lambda:us-east-1:598858048125:layer:todoLayer:11
+      - arn:aws:lambda:us-east-1:598858048125:layer:todoLayer:13
     events:
       - http:
           path: v1/todos/{id}
@@ -113,6 +121,8 @@ functions:
 #            Fn::GetAtt:
 #              - TodoTable # CloudFormation refers to the logical ID (TodoTable) and not the TableName
 #              - StreamArn
+      - sqs:
+          arn:aws:sqs:us-east-1:598858048125:TodoQueue
 
   connect:
     package:
@@ -140,5 +150,16 @@ functions:
     events:
       - websocket:
           route: sendMessage
+      - sqs:
+          arn:aws:sqs:us-east-1:598858048125:TodoQueue
+
+  process_sqs:
+    package:
+      patterns:
+        - 'src/sqsHandler.py'
+    handler: src.sqsHandler.lambda_handler
+    events:
+      - sqs:
+          arn:aws:sqs:us-east-1:598858048125:TodoQueue
 
 #resources: ${file(./resources.yml):resources}

@@ -34,8 +34,9 @@ iamRoleStatements:
 
   - Effect: Allow
     Action:
+      - sqs:SendMessage
       - sqs:ReceiveMessage
       - sqs:DeleteMessage
       - sqs:GetQueueAttributes
     Resource:
-      - arn:aws:sqs:${self:provider.region}:*:queue/TodoQueueNew
+      - arn:aws:sqs:us-east-1:598858048125:TodoQueue

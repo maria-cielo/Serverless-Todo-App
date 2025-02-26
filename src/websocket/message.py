@@ -3,7 +3,7 @@ import json
 
 
 dynamodb = boto3.resource("dynamodb")
-APIGW_MANAGEMENT_API = "https://7zlf4mc04b.execute-api.us-east-1.amazonaws.com/dev"
+APIGW_MANAGEMENT_API = "https://vu7zzd52p2.execute-api.us-east-1.amazonaws.com/dev"
 api_gateway = boto3.client("apigatewaymanagementapi",
                            endpoint_url=APIGW_MANAGEMENT_API
                            )

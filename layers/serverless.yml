@@ -12,6 +12,7 @@ layers:
       - python3.11
     description: "Lambda Layer for Python dependencies"
     package:
+      individually: true
       include:
         - python/**
 
