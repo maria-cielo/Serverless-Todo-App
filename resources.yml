@@ -16,9 +16,18 @@ resources:
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S
+#          - AttributeName: completed # Used for GSI (Global Secondary Index)
+#            AttributeType: BOOL
         KeySchema:
           - AttributeName: id
             KeyType: HASH
+#        GlobalSecondaryIndexes:
+#          -IndexName: CompletedTaskIndex
+#          KeySchema:
+#             - AttributeName: completed
+#               KeyType: HASH
+#          Projection:
+#            ProjectionType: ALL
         StreamSpecification:
           StreamViewType: NEW_AND_OLD_IMAGES
 

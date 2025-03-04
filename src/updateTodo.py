@@ -12,6 +12,9 @@ def lambda_handler(event, context):
 
     todo_id = event["pathParameters"]["id"]
     data = json.loads(event.get("body", {}))
-    updated_todo = update_todo(todo_id, data["task"], data["completed"])
+    task = data.get("task")
+    completed = data.get("completed")
+
+    updated_todo = update_todo(todo_id, task, completed)
 
     return {"statusCode": 200, "body": json.dumps(updated_todo)}

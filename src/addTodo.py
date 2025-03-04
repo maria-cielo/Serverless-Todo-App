@@ -12,7 +12,10 @@ def lambda_handler(event, context):
         return dynamo_db_stream(event)
 
     data = json.loads(event.get("body", {}))
-    todo = create_todo(data["task"])
+    task = data.get("task")
+    completed = data.get("completed", "false")
+
+    todo = create_todo(task, completed)
 
     return {
         "statusCode": 201,

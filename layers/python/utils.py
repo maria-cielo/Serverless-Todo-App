@@ -14,12 +14,12 @@ table = dynamodb.Table("TodosNew")
 sqs = boto3.client("sqs")
 
 
-def create_todo(task):
+def create_todo(task, completed):
     todo_id = str(uuid4())
     item = {
         "id": todo_id,
         "task": task,
-        "completed": False
+        "completed": completed
     }
     table.put_item(Item=item)
 
@@ -51,13 +51,23 @@ def get_all_todos():
 
 
 def update_todo(todo_id, task, completed):
+    update_expression_parts = []
+    expression_values = {}
+
+    if task is not None:
+        update_expression_parts.append("task = :t")
+        expression_values[":t"] = task
+
+    if completed is not None:
+        update_expression_parts.append("completed = :c")
+        expression_values[":c"] = completed
+
+    update_expression = "SET " + ", ".join(update_expression_parts)
+
     result = table.update_item(
         Key={"id": todo_id},
-        UpdateExpression="set task=:t, completed=:c",
-        ExpressionAttributeValues={
-            ":t": task,
-            ":c": completed
-        },
+        UpdateExpression=update_expression,
+        ExpressionAttributeValues=expression_values,
         ReturnValues="UPDATED_NEW"
     )
 

@@ -13,9 +13,11 @@ iamRoleStatements:
       - dynamodb:UpdateItem
       - dynamodb:DeleteItem
       - dynamodb:Scan
+      - dynamodb:Query # For GSI
     Resource:
       - arn:aws:dynamodb:us-east-1:598858048125:table/TodosNew
       - arn:aws:dynamodb:us-east-1:598858048125:table/TodoWebSocket
+      - arn:aws:dynamodb:us-east-1:598858048125:table/TodosNew/index/completed-task-index # For GSI
 
   - Effect: Allow
     Action:

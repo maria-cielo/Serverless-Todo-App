@@ -85,6 +85,19 @@ functions:
           method: get
           private: true
 
+  get_completed_tasks:
+    package:
+      patterns:
+        - 'src/getCompletedTasks.py'
+    handler: src.getCompletedTasks.lambda_handler
+    layers:
+      - arn:aws:lambda:us-east-1:598858048125:layer:todoLayer:13
+    events:
+      - http:
+          path: v1/todos/completed
+          method: get
+          private: true
+
   update_todo:
     package:
       patterns:
