@@ -46,6 +46,7 @@ functions:
       patterns:
         - 'src/addTodo.py'
     handler: src.addTodo.lambda_handler
+#    reservedConcurrency: 5 ## Preventing Overloading
     layers:
       - arn:aws:lambda:us-east-1:598858048125:layer:todoLayer:13
     events:
@@ -56,6 +57,12 @@ functions:
       - stream:
           type: dynamodb
           arn: arn:aws:dynamodb:us-east-1:598858048125:table/TodosNew/stream/2025-02-21T05:04:14.613
+          filterPatterns:
+            - eventName: [INSERT]
+              dynamodb:
+                NewImage:
+                  completed:
+                    S: ["false"]
       - sqs:
           arn:aws:sqs:us-east-1:598858048125:TodoQueue
 
@@ -103,6 +110,7 @@ functions:
       patterns:
         - 'src/updateTodo.py'
     handler: src.updateTodo.lambda_handler
+#    provisionedConcurrency: 5 ## Performance-critical apps (Low latency)
     layers:
       - arn:aws:lambda:us-east-1:598858048125:layer:todoLayer:13
     events:
@@ -113,6 +121,12 @@ functions:
       - stream:
           type: dynamodb
           arn: arn:aws:dynamodb:us-east-1:598858048125:table/TodosNew/stream/2025-02-21T05:04:14.613
+          filterPatterns:
+            - eventName: [ MODIFY ]
+              dynamodb:
+                NewImage:
+                  completed:
+                    S: [ "true" ]
       - sqs:
           arn:aws:sqs:us-east-1:598858048125:TodoQueue
   delete:

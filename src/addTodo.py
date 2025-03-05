@@ -6,8 +6,6 @@ from layers.python.utils import (
 
 
 def lambda_handler(event, context):
-    print("Received event: ", event)
-
     if "Records" in event:
         return dynamo_db_stream(event)
 
