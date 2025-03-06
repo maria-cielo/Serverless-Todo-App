@@ -44,7 +44,27 @@ resources:
           - AttributeName: connectionId
             KeyType: HASH
 
+    # Standard Queue
     TodoQueue:
       Type: AWS::SQS::Queue
       Properties:
         QueueName: TodoQueueNew
+
+    # FIFO Queue
+    TodoFIFOQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: TodoQueue.fifo
+        FifoQueue: true
+        ContentBasedDuplication: false
+        VisibilityTimeout: 30 # Lambda should complete execution in 30 seconds
+        MessageRetentionPeriod: 345600 # Retain messages for 4 days
+        RedrivePolicy:
+          deadLetterTargetArn: !GetAtt TodoDeadLetterQueue.Arn
+          maxReceiveCount: 5 # Move to DLQ after 5 failed attempts
+
+    # DLQ
+    TodoDeadLetterQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: TodoDeadLetterQueue

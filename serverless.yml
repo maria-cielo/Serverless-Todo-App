@@ -64,7 +64,9 @@ functions:
                   completed:
                     S: ["false"]
       - sqs:
-          arn:aws:sqs:us-east-1:598858048125:TodoQueue
+          arn: arn:aws:sqs:us-east-1:598858048125:TodoQueue
+          batchSize: 5 # Process upto 5 messages at a time per invocation
+          maximumBatchingWindow: 10 # Wait up to 10 seconds to batch messages before invoking Lambda (if the batch isn't full)
 
   get_todo:
     package:
