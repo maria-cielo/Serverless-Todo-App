@@ -189,6 +189,8 @@ functions:
     handler: src.sqsHandler.lambda_handler
     events:
       - sqs:
-          arn:aws:sqs:us-east-1:598858048125:TodoQueue
+          arn: arn:aws:sqs:us-east-1:598858048125:TodoQueue
+          batchSize: 5
+          maximumBatchingWindow: 60
 
 #resources: ${file(./resources.yml):resources}
