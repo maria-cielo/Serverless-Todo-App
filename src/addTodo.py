@@ -9,7 +9,12 @@ def lambda_handler(event, context):
     if "Records" in event:
         return dynamo_db_stream(event)
 
-    data = json.loads(event.get("body", {}))
+    body = event.get("body", "{}")
+    if isinstance(body, dict):
+        data = body
+    else:
+        data = json.loads(body)
+
     task = data.get("task")
     completed = data.get("completed", "false")
 

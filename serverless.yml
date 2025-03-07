@@ -194,5 +194,4 @@ functions:
           maximumBatchingWindow: 60
 
 #resources: ${file(./resources.yml):resources}
-
-## Testing
+#resources: ${file(./iot.yml):resources}
